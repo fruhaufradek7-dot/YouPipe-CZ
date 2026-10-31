@@ -132,7 +132,7 @@ class _SubscriptionsScreenState extends ConsumerState<SubscriptionsScreen> {
                     padding: const EdgeInsets.all(8),
                     sliver: SliverGrid.builder(
                       gridDelegate:
-                          SliverGridDelegateWithMaxCrossAxisExtent(
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 220,
                         childAspectRatio: 9 / 16,
                         mainAxisSpacing: 8,
@@ -222,7 +222,7 @@ class _ChannelStrip extends ConsumerWidget {
       );
 }
 
-/// Diagnostika všech odběrů.
+/// Přehled všech odebíraných kanálů.
 class ChannelsScreen extends ConsumerWidget {
   const ChannelsScreen({super.key});
 
@@ -231,16 +231,13 @@ class ChannelsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint('VIDELON DEBUG: ChannelsScreen build');
-
+    final colors = context.yt;
     final subscriptions = ref.watch(subscriptionsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: const Text('Diagnostika odběrů'),
+        title: const Text('Všechny odběry'),
         leading: IconButton(
           onPressed: () => context.pop(),
           icon: const Icon(Symbols.arrow_back),
@@ -251,44 +248,61 @@ class ChannelsScreen extends ConsumerWidget {
       ),
       body: MaxContentWidth(
         child: subscriptions.when(
-          loading: () {
-            debugPrint('VIDELON DEBUG: subscriptions loading');
-            return const Center(
-              child: Text(
-                'DIAGNOSTIKA: Načítání odběrů…',
-                style: TextStyle(color: Colors.black, fontSize: 18),
-              ),
-            );
-          },
-          error: (error, stackTrace) {
-            debugPrint('VIDELON DEBUG: subscriptions error: $error');
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  'DIAGNOSTIKA: CHYBA\n$error',
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 16,
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          error: (error, stackTrace) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Symbols.error_outline,
+                    size: 42,
+                    color: colors.textSecondary,
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Odběry se nepodařilo načíst',
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '$error',
+                    style: TextStyle(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
           data: (subs) {
-            debugPrint(
-              'VIDELON DEBUG: subscriptions data: ${subs.length}',
-            );
-
             if (subs.isEmpty) {
-              return const Center(
-                child: Text(
-                  'DIAGNOSTIKA: Seznam odběrů je prázdný.',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                  ),
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Symbols.subscriptions,
+                      size: 48,
+                      color: colors.textSecondary,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Zatím nemáte žádné odběry',
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               );
             }
@@ -296,30 +310,70 @@ class ChannelsScreen extends ConsumerWidget {
             return Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'DIAGNOSTIKA OK\nNačteno odběrů: ${subs.length}',
-                    style: const TextStyle(
-                      color: Colors.green,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Odebírané kanály',
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.chip,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '${subs.length}',
+                          style: TextStyle(
+                            color: colors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView.separated(
                     itemCount: subs.length,
+                    separatorBuilder: (_, __) => Divider(
+                      height: 1,
+                      indent: 76,
+                      color: colors.divider,
+                    ),
                     itemBuilder: (context, i) => ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       leading: Avatar(
                         subs[i].avatar,
-                        size: 40,
+                        size: 48,
                         name: subs[i].name,
                       ),
                       title: Text(
                         subs[i].name,
-                        style: const TextStyle(color: Colors.black),
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      trailing: Icon(
+                        Symbols.chevron_right,
+                        color: colors.textSecondary,
+                      ),
+                      onTap: () =>
+                          openChannel(context, ref, subs[i].id),
                     ),
                   ),
                 ),
