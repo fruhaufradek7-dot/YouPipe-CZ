@@ -125,12 +125,12 @@ flutter_launcher_icons:
   adaptive_icon_monochrome: "assets/branding/logo_monochrome_1024.png"
 
 flutter_native_splash:
-  color: "#FFFFFF"
+  color: "#0F0F0F"
   image: assets/branding/splash.png
   color_dark: "#0F0F0F"
   image_dark: assets/branding/splash.png
   android_12:
-    color: "#FFFFFF"
+    color: "#0F0F0F"
     image: assets/branding/splash_android12.png
     color_dark: "#0F0F0F"
     image_dark: assets/branding/splash_android12.png
